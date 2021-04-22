@@ -255,6 +255,8 @@ Note that this config has no transport_socket. That is intentional, the default 
   clusters:
   - name: spire_agent
     connect_timeout: 1s
+    type: STATIC
+    lb_policy: ROUND_ROBIN
     typed_extension_protocol_options:
       envoy.extensions.upstreams.http.v3.HttpProtocolOptions:
         "@type": type.googleapis.com/envoy.extensions.upstreams.http.HttpProtocolOptions
