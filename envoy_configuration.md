@@ -148,7 +148,7 @@ tls_context:
         - exact: TEMPLATE_CLIENT_SPIFFE_ID
         - exact: TEMPLATE_SERVER_SPIFFE_ID
       validation_context_sds_secret_config:
-        name: TEMPLATE_TRUST_DOMaIN
+        name: TEMPLATE_TRUST_DOMAIN
         sds_config:
           api_config_source:
             api_type: GRPC
@@ -351,10 +351,10 @@ This should work for either HTTP or TCP traffic.
           combined_validation_context:
             default_validation_context:
               match_subject_alt_names:
-                - exact: {{ .Values.backendSpiffeId }}
+                - exact: TEMPLATE_UPSTREAM_SPIFFE_ID
                 # Add more SPIFFE IDs here if necessary
             validation_context_sds_secret_config:
-              name: {{ .Values.trustDomain }}
+              name: TEMPLATE_TRUST_DOMAIN
               sds_config:
                 resource_api_version: V3
                 api_config_source:
