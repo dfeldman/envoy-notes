@@ -333,10 +333,26 @@ This should work for either HTTP or TCP traffic.
     transport_socket:
       name: envoy.transport_sockets.tls
       typed_config:
+      typed_config:
         "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
-          common_tls_context:
-            tls_certificate_sds_secret_configs:
-            - name: TEMPLATE_SERVER_SPIFFE_ID
+        common_tls_context:
+          tls_certificate_sds_secret_configs:
+          - name: {{ .Values.frontendSpiffeId }}
+            sds_config:
+              resource_api_version: V3
+              api_config_source:
+                api_type: GRPC
+                transport_api_version: V3
+                grpc_services:
+                  envoy_grpc:
+                    cluster_name: spire_agent
+          combined_validation_context:
+            default_validation_context:
+              match_subject_alt_names:
+                - exact: {{ .Values.backendSpiffeId }}
+                # Add more SPIFFE IDs here if necessary
+            validation_context_sds_secret_config:
+              name: {{ .Values.trustDomain }}
               sds_config:
                 resource_api_version: V3
                 api_config_source:
@@ -344,23 +360,7 @@ This should work for either HTTP or TCP traffic.
                   transport_api_version: V3
                   grpc_services:
                     envoy_grpc:
-                      cluster_name: spire_agent
-            combined_validation_context:
-              default_validation_context:
-                match_subject_alt_names:
-                  - exact: TEMPLATE_SERVER_SPIFFE_ID # for testing
-                  - exact: TEMPLATE_UPSTREAM_SPIFFE_ID
-                  # Add more SPIFFE IDs here if necessary
-              validation_context_sds_secret_config:
-                name: TEMPLATE_TRUST_DOMAIN
-                sds_config:
-                  resource_api_version: V3
-                  api_config_source:
-                    api_type: GRPC
-                    transport_api_version: V3
-                    grpc_services:
-                      envoy_grpc:
-                        cluster_name: spire_agent # Must be specified in "clusters"
+                      cluster_name: spire_agent # Must be specified in "clusters"
 ```
 
 
