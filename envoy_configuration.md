@@ -65,6 +65,8 @@ admin:
 ```
 Connecting to this port will show an extremely useful admin interface that lets you see what Envoy is actually doing.
 
+You can use http://localhost:9901/ready as a readiness probe for Kubernetes.
+
 This should not be exposed in production.
 
 
