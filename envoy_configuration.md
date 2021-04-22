@@ -87,7 +87,7 @@ static_resources:
     access_log:
     - name: envoy.file_access_log
       config:
-        path: "/dev/stdout"
+        path: TEMPLATE_ACCESS_LOG_PATH
     stat_prefix: ingress_http
     route_config:
       name: service_route
@@ -365,3 +365,21 @@ This should work for either HTTP or TCP traffic.
                 address: 127.0.0.1
                 port_value: TEMPLATE_UPSTREAM_PORT
 ```
+
+## Using it in a Helm chart ConfigMap
+ConfigMap:
+```
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "envoy.fullname" . }}
+  labels:
+    app: {{ template "envoy.name" . }}
+    chart: {{ template "envoy.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  envoy.yaml: |
+```
+Then paste the envoy config in, indented 4 spaces. 
+
