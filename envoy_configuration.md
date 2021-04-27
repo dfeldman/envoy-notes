@@ -162,6 +162,67 @@ tls_context:
       - X25519:P-256:P-521:P-384
 ```
 
+## TLS HTTP listener (V3)
+(Need to test this one)
+```
+  - name: tls-http-listener
+    address:
+      socket_address:
+        address: TEMPLATE_LISTEN_ADDRESS
+        port_value: TEMPLATE_LISTEN_PORT
+    filter_chains:
+    - filters:
+      - name: envoy.filters.network.http_connection_manager
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+          codec_type: AUTO
+          stat_prefix: ingress_http
+          route_config:
+            name: local_route
+            virtual_hosts:
+            - name: app
+              domains:
+              - "*"
+              routes:
+              - match:
+                  prefix: "/"
+                route:
+                  cluster: service-http
+          http_filters:
+          - name: envoy.filters.http.router
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.DownstreamTlsContext
+          common_tls_context:
+            tls_certificate_sds_secret_configs:
+            - name: TEMPLATE_SERVER_SPIFFE_ID
+              sds_config:
+                resource_api_version: V3
+                api_config_source:
+                  api_type: GRPC
+                  transport_api_version: V3
+                  grpc_services:
+                    envoy_grpc:
+                      cluster_name: spire_agent
+            combined_validation_context:
+              default_validation_context:
+                match_subject_alt_names:
+                  - exact: TEMPLATE_SERVER_SPIFFE_ID # for testing
+                  - exact: TEMPLATE_CLIENT_SPIFFE_ID
+                  # Add more SPIFFE IDs here if necessary
+              validation_context_sds_secret_config:
+                name: TEMPLATE_TRUST_DOMAIN
+                sds_config:
+                  resource_api_version: V3
+                  api_config_source:
+                    api_type: GRPC
+                    transport_api_version: V3
+                    grpc_services:
+                      envoy_grpc:
+                        cluster_name: spire_agent # Must be specified in "clusters"
+```
+
 ## Non-TLS TCP listener (V3)
 Note that this config has no transport_socket. That is intentional, the default is raw TCP. 
 
